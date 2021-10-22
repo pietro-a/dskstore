@@ -1,0 +1,5 @@
+module github.com/pietro-a/dskstore
+
+go 1.17
+
+require github.com/rogpeppe/go-internal v1.8.0
