@@ -39,6 +39,16 @@ type DskStore struct {
 }
 
 func NewDskStore(path string, prt, lvl int) (d *DskStore, err error) {
+    if prt <= 0 {
+        err = fmt.Errorf("Invalid partitions count (%v)", prt)
+        return
+    }
+
+    if lvl <= 0 {
+        err = fmt.Errorf("Invalid cache levels count (%v)", lvl)
+        return
+    }
+
     if prt > MaxPartitions {
         err = fmt.Errorf("Too many partitions requested (%v)", prt)
         return
