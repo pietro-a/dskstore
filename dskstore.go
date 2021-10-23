@@ -66,25 +66,19 @@ func NewDskStore(path string, prt, lvl int) (d *DskStore, err error) {
     return
 }
 
-func (d *DskStore) Exists(fn string) (exists bool, err error) {
+func (d *DskStore) Exists(fn string) bool {
     base, name := d.getCachePath(fn)
 
     inf, err := os.Stat(filepath.Join(base, name))
     if err != nil {
-        if errors.Is(err, fs.ErrNotExist) {
-            err = nil
-        }
-        return
+        return false
     }
 
     if !inf.Mode().IsRegular() {
-        err = fmt.Errorf("object is not a file: %v", fn)
-        return
+        return false
     }
 
-    exists = true
-
-    return
+    return true
 }
 
 func (d *DskStore) Store(fn string, src io.Reader) (err error) {

@@ -26,6 +26,13 @@ if err = d.Store("00000001.txt", strings.NewReader("test data")); err != nil {
 - store provided content of "00000001.txt" in storage/3/9/9/a/f/99af904a8245824376beaab015e49a9d8a2db278.txt
 
 ```
+if !d.Exists("00000001.txt") {
+    panic("object doesn't exist")
+}
+```
+- check object existence
+
+```
 data, err := d.Retrieve("00000001.txt")
 if err != nil {
     panic(err)
