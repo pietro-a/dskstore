@@ -1,21 +1,25 @@
 package dskstore
 
 import (
-    "github.com/rogpeppe/go-internal/lockedfile"
-
     "crypto/sha1"
 
     "encoding/hex"
+    "errors"
 
     "fmt"
 
     "io"
+    "io/fs"
 
     "os"
 
     "path/filepath"
 
     "strings"
+)
+
+import (
+    "github.com/rogpeppe/go-internal/lockedfile"
 )
 
 const (
@@ -62,6 +66,27 @@ func NewDskStore(path string, prt, lvl int) (d *DskStore, err error) {
     return
 }
 
+func (d *DskStore) Exists(fn string) (exists bool, err error) {
+    base, name := d.getCachePath(fn)
+
+    inf, err := os.Stat(filepath.Join(base, name))
+    if err != nil {
+        if errors.Is(err, fs.ErrNotExist) {
+            err = nil
+        }
+        return
+    }
+
+    if !inf.Mode().IsRegular() {
+        err = fmt.Errorf("object is not a file: %v", fn)
+        return
+    }
+
+    exists = true
+
+    return
+}
+
 func (d *DskStore) Store(fn string, src io.Reader) (err error) {
     base, name := d.getCachePath(fn)
     if err = os.MkdirAll(base, dirMode); err != nil {
@@ -79,6 +104,9 @@ func (d *DskStore) Retrieve(fn string) (data []byte, err error) {
     base, name := d.getCachePath(fn)
 
     if data, err = lockedfile.Read(filepath.Join(base, name)); err != nil {
+        if errors.Is(err, fs.ErrNotExist) {
+            err = fmt.Errorf("object not found: %v", fn)
+        }
         return
     }
 
